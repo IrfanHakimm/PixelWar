@@ -13,10 +13,10 @@ public class Player extends Entity {
 
     private GamePanel gp;
     private KeyHandler keyH;
-    private BufferedImage[] upFrames, downFrames, leftFrames, rightFrames;
+    private BufferedImage[] up, down, left, right;
     private int currentFrame = 0;
     private int totalFrames = 4;
-    private int animationSpeed = 8;
+    // private int animationSpeed = 8;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         this.gp = gp;
@@ -57,13 +57,12 @@ public class Player extends Entity {
         currentFrame = (currentFrame + 1) % totalFrames;
     }
 
-
     public void getPlayerImages() {
         try {
-            upFrames = loadFrames("/player/Character_Up.png");
-            downFrames = loadFrames("/player/Character_Down.png");
-            leftFrames = loadFrames("/player/Character_Left.png");
-            rightFrames = loadFrames("/player/Character_Right.png");
+            up = loadFrames("/player/Character_Up.png");
+            down = loadFrames("/player/Character_Down.png");
+            left = loadFrames("/player/Character_Left.png");
+            right = loadFrames("/player/Character_Right.png");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -86,16 +85,16 @@ public class Player extends Entity {
 
         switch (direction) {
             case "up":
-                frames = upFrames;
+                frames = up;
                 break;
             case "down":
-                frames = downFrames;
+                frames = down;
                 break;
             case "left":
-                frames = leftFrames;
+                frames = left;
                 break;
             case "right":
-                frames = rightFrames;
+                frames = right;
                 break;
         }
 
