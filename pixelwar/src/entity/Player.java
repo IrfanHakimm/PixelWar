@@ -16,7 +16,7 @@ public class Player extends Entity {
     private BufferedImage[] up, down, left, right;
     private int currentFrame = 0;
     private int totalFrames = 4;
-    // private int animationSpeed = 8;
+    private boolean isMoving = false;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         this.gp = gp;
@@ -36,24 +36,46 @@ public class Player extends Entity {
         if (keyH.upPressed) {
             direction = "up";
             y -= speed;
+            isMoving = true;
             updateAnimation();
         } else if (keyH.downPressed) {
             direction = "down";
             y += speed;
+            isMoving = true;
             updateAnimation();
         } else if (keyH.leftPressed) {
             direction = "left";
             x -= speed;
+            isMoving = true;
             updateAnimation();
         } else if (keyH.rightPressed) {
             direction = "right";
             x += speed;
+            isMoving = true;
             updateAnimation();
+        } else {
+            isMoving = false;
+        }
+
+        if (!isMoving) {
+            switch (direction) {
+                case "up":
+                    currentFrame = 0;
+                    break;
+                case "down":
+                    currentFrame = 0;
+                    break;
+                case "left":
+                    currentFrame = 0;
+                    break;
+                case "right":
+                    currentFrame = 0;
+                    break;
+            }
         }
     }
 
     private void updateAnimation() {
-        // Update animation frame only when the player is moving
         currentFrame = (currentFrame + 1) % totalFrames;
     }
 
@@ -99,6 +121,6 @@ public class Player extends Entity {
         }
 
         BufferedImage image = frames[currentFrame];
-        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, x, y, gp.tileSize * 2, gp.tileSize * 2, null);
     }
 }
