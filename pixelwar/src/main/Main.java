@@ -6,7 +6,7 @@ public class Main extends JFrame {
 	public static void main(String[] args) {
 		JFrame window = new JFrame();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setResizable(false);
+		window.setResizable(true);
 		window.setTitle("PixelWar");
 
 		GamePanel gamePanel = new GamePanel();
