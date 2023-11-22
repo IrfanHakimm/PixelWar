@@ -17,46 +17,53 @@ public class Player extends Entity {
     private int currentFrame = 0;
     private int totalFrames = 4;
     private boolean isMoving = false;
+    private long lastFrameChangeTime;
+    private long frameChangeDelay = 100;
+    public final int screenX;
+    public final int screenY;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         this.gp = gp;
         this.keyH = keyH;
         getPlayerImages();
         setDefaultValues();
+        screenX = gp.screenWidth / 2 - (gp.tileSize / 2);
+        screenY = gp.screenHeight / 2 - (gp.tileSize / 2);
+        lastFrameChangeTime = System.currentTimeMillis();
     }
 
     public void setDefaultValues() {
-        x = 100;
-        y = 100;
-        speed = 4;
+        worldX = gp.tileSize *23;
+        worldY = gp.tileSize *21;
+        speed = 8;
         direction = "down";
     }
 
     public void update() {
         if (keyH.upPressed) {
             direction = "up";
-            y -= speed;
+            worldY -= speed;
             isMoving = true;
             updateAnimation();
         } else if (keyH.downPressed) {
             direction = "down";
-            y += speed;
+            worldY += speed;
             isMoving = true;
             updateAnimation();
         } else if (keyH.leftPressed) {
             direction = "left";
-            x -= speed;
+            worldX -= speed;
             isMoving = true;
             updateAnimation();
         } else if (keyH.rightPressed) {
             direction = "right";
-            x += speed;
+            worldX += speed;
             isMoving = true;
             updateAnimation();
         } else {
             isMoving = false;
         }
-
+        
         if (!isMoving) {
             switch (direction) {
                 case "up":
@@ -76,7 +83,13 @@ public class Player extends Entity {
     }
 
     private void updateAnimation() {
-        currentFrame = (currentFrame + 1) % totalFrames;
+        long now = System.currentTimeMillis();
+
+        // Check if enough time has passed to change the frame
+        if (now - lastFrameChangeTime > frameChangeDelay) {
+            currentFrame = (currentFrame + 1) % totalFrames;
+            lastFrameChangeTime = now;
+        }
     }
 
     public void getPlayerImages() {
@@ -121,6 +134,6 @@ public class Player extends Entity {
         }
 
         BufferedImage image = frames[currentFrame];
-        g2.drawImage(image, x, y, gp.tileSize * 2, gp.tileSize * 2, null);
+        g2.drawImage(image, screenX, screenY, gp.tileSize * 2, gp.tileSize * 2, null);
     }
 }

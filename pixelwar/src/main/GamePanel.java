@@ -12,7 +12,7 @@ import java.awt.Color;
 
 public class GamePanel extends JPanel implements Runnable {
     final int originalTileSize = 16; // 16x16
-    final int scale = 2;
+    final int scale = 3;
 
     public final int tileSize = originalTileSize * scale; // 48x48
     public int maxScreenCol = 16;
@@ -20,11 +20,16 @@ public class GamePanel extends JPanel implements Runnable {
     public int screenWidth = tileSize * maxScreenCol; // 768px
     public int screenHeight = tileSize * maxScreenRow; // 576px
 
+    public final int maxWorldCol = 50;
+    public final int maxWorldRow = 50;
+    public final int worldwidth = tileSize * maxWorldCol;
+    public final int worldheight = tileSize * maxWorldRow;
+
     int fps = 32;
 
     Thread gameThread;
     KeyHandler keyH = new KeyHandler();
-    Player player = new Player(this, keyH);
+    public Player player = new Player(this, keyH);
     TileManager tm = new TileManager(this);
 
     public GamePanel() {
