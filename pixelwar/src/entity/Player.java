@@ -2,7 +2,11 @@ package entity;
 
 import main.KeyHandler;
 
+import java.awt.AlphaComposite;
+// import java.awt.Color;
+// import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -23,61 +27,128 @@ public class Player extends Entity {
     public final int screenY;
 
     public Player(GamePanel gp, KeyHandler keyH) {
+        super(gp);
         this.gp = gp;
         this.keyH = keyH;
-        getPlayerImages();
-        setDefaultValues();
         screenX = gp.screenWidth / 2 - (gp.tileSize / 2);
         screenY = gp.screenHeight / 2 - (gp.tileSize / 2);
+        solidArea = new Rectangle();
+        solidArea.x = 0;
+        solidArea.y = 0;
+        solidArea.width = gp.tileSize * 2;
+        solidArea.height = gp.tileSize * 2;
         lastFrameChangeTime = System.currentTimeMillis();
+        getPlayerImages();
+        setDefaultValues();
+        getPlayerAttackImages();
     }
 
     public void setDefaultValues() {
-        worldX = gp.tileSize *23;
-        worldY = gp.tileSize *21;
+        worldX = gp.tileSize * 25;
+        worldY = gp.tileSize * 25;
         speed = 8;
         direction = "down";
+
+        // status
+        maxLife = 6;
+        life = maxLife;
+        invincible = false;
+    }
+
+    public void getPlayerImages() {
+        try {
+            up = loadFrames("/player/Character_Up.png");
+            down = loadFrames("/player/Character_Down.png");
+            left = loadFrames("/player/Character_Left.png");
+            right = loadFrames("/player/Character_Right.png");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getPlayerAttackImages() {
+        try {
+            attackUpRight = loadFrames("/player/Sword_UpRight.png");
+            attackUpRight = loadFrames("/player/Sword_UpLeft.png");
+            attackDownRight = loadFrames("/player/Sword_DownRight.png");
+            attackDownLeft = loadFrames("/player/Sword_DownLeft.png");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void update() {
+        isMoving = false;
+
         if (keyH.upPressed) {
             direction = "up";
-            worldY -= speed;
             isMoving = true;
-            updateAnimation();
         } else if (keyH.downPressed) {
             direction = "down";
-            worldY += speed;
             isMoving = true;
-            updateAnimation();
         } else if (keyH.leftPressed) {
             direction = "left";
-            worldX -= speed;
             isMoving = true;
-            updateAnimation();
         } else if (keyH.rightPressed) {
             direction = "right";
-            worldX += speed;
             isMoving = true;
-            updateAnimation();
-        } else {
-            isMoving = false;
         }
-        
-        if (!isMoving) {
+
+        collisionOn = false;
+        gp.cChecker.CheckTileForPlayer(this);
+        int slimeIndex = gp.cChecker.checkEntity(this, gp.slime);
+        interactMonster(slimeIndex);
+        contactMonster(slimeIndex);
+
+        if (collisionOn == false && isMoving) {
             switch (direction) {
                 case "up":
-                    currentFrame = 0;
+                    worldY -= speed;
+                    updateAnimation();
                     break;
                 case "down":
-                    currentFrame = 0;
+                    worldY += speed;
+                    updateAnimation();
                     break;
                 case "left":
-                    currentFrame = 0;
+                    worldX -= speed;
+                    updateAnimation();
                     break;
                 case "right":
-                    currentFrame = 0;
+                    worldX += speed;
+                    updateAnimation();
                     break;
+            }
+        }
+
+        if (!isMoving) {
+            currentFrame = 0;
+        }
+        if (invincible == true) {
+            invincibleCounter++;
+            if (invincibleCounter > 60) {
+                invincible = false;
+                invincibleCounter = 0;
+            }
+        }
+
+        if (life <= 0) {
+            gp.playSE(2);
+            gp.gameState = gp.gameOverState;
+        }
+    }
+
+    public void interactMonster(int i) {
+        if (i != 999) {
+            System.out.println("Slime collided with player");
+        }
+    }
+
+    public void contactMonster(int i) {
+        if (i != 999) {
+            if (invincible == false) {
+                life -= i;
+                invincible = true;
             }
         }
     }
@@ -89,17 +160,6 @@ public class Player extends Entity {
         if (now - lastFrameChangeTime > frameChangeDelay) {
             currentFrame = (currentFrame + 1) % totalFrames;
             lastFrameChangeTime = now;
-        }
-    }
-
-    public void getPlayerImages() {
-        try {
-            up = loadFrames("/player/Character_Up.png");
-            down = loadFrames("/player/Character_Down.png");
-            left = loadFrames("/player/Character_Left.png");
-            right = loadFrames("/player/Character_Right.png");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -133,7 +193,17 @@ public class Player extends Entity {
                 break;
         }
 
+        if (invincible == true) {
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4F));
+        }
+
         BufferedImage image = frames[currentFrame];
         g2.drawImage(image, screenX, screenY, gp.tileSize * 2, gp.tileSize * 2, null);
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1F));
+
+        // DEBUG INVINCIBLE
+        // g2.setFont(new Font("Arial", Font.PLAIN, 26));
+        // g2.setColor(Color.white);
+        // g2.drawString("Invincible: " + invincibleCounter, 10, 400);
     }
 }

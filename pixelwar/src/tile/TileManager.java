@@ -11,8 +11,8 @@ import main.GamePanel;
 
 public class TileManager {
 	GamePanel gp;
-	Tile[] tile;
-	int mapTileNum[][];
+	public Tile[] tile;
+	public int mapTileNum[][];
 
 	public TileManager(GamePanel gp) {
 		this.gp = gp;
@@ -55,6 +55,11 @@ public class TileManager {
 			tile[13].image = ImageIO.read(getClass().getResourceAsStream("/tiles/lava_shadow_atas.png"));
 			tile[14] = new Tile();
 			tile[14].image = ImageIO.read(getClass().getResourceAsStream("/tiles/lava_shadow_atas_kanan.png"));
+
+			for (int i = 9; i <= 12; i++) {
+				tile[i].collision = true;
+			}
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,7 +67,7 @@ public class TileManager {
 
 	public void loadMap() {
 		try {
-			InputStream is = getClass().getResourceAsStream("/map/map.txt");
+			InputStream is = getClass().getResourceAsStream("/maps/map.txt");
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
 			int col = 0;
@@ -90,7 +95,6 @@ public class TileManager {
 	}
 
 	public void draw(Graphics2D g2) {
-		// g2.drawImage(tile[0].image, 0, 0, gp.tileSize, gp.tileSize, null);
 
 		int col = 0;
 		int row = 0;
@@ -98,12 +102,20 @@ public class TileManager {
 		while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
 
 			int tileNum = mapTileNum[col][row];
+
 			int worldX = col * gp.tileSize;
 			int worldY = row * gp.tileSize;
 			int screenX = worldX - gp.player.worldX + gp.player.screenX;
 			int screenY = worldY - gp.player.worldY + gp.player.screenY;
 
-			g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+			if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
+					worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
+					worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
+					worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
+
+				g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+
+			}
 
 			col++;
 			if (col == gp.maxWorldCol) {
@@ -111,5 +123,6 @@ public class TileManager {
 				row++;
 			}
 		}
+
 	}
 }

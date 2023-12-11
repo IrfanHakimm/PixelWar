@@ -3,6 +3,8 @@ package main;
 import javax.swing.JPanel;
 
 import entity.Player;
+import environment.EnvironmentManager;
+import monster.Slime;
 import tile.TileManager;
 
 import java.awt.Dimension;
@@ -15,22 +17,38 @@ public class GamePanel extends JPanel implements Runnable {
     final int scale = 3;
 
     public final int tileSize = originalTileSize * scale; // 48x48
-    public int maxScreenCol = 16;
+    public int maxScreenCol = 20;
     public int maxScreenRow = 12;
     public int screenWidth = tileSize * maxScreenCol; // 768px
     public int screenHeight = tileSize * maxScreenRow; // 576px
 
     public final int maxWorldCol = 50;
-    public final int maxWorldRow = 50;
+    public final int maxWorldRow = 51;
     public final int worldwidth = tileSize * maxWorldCol;
     public final int worldheight = tileSize * maxWorldRow;
 
-    int fps = 32;
+    int fps = 60;
 
-    Thread gameThread;
-    KeyHandler keyH = new KeyHandler();
-    public Player player = new Player(this, keyH);
+    // system
     TileManager tm = new TileManager(this);
+    KeyHandler keyH = new KeyHandler(this);
+    Sound sound = new Sound();
+    public UI ui = new UI(this);
+    public CollisionChecker cChecker = new CollisionChecker(this);
+    public AssetSetter aSetter = new AssetSetter(this);
+    EnvironmentManager env = new EnvironmentManager(this);
+    Thread gameThread;
+
+    // game state
+    public int gameState;
+    public final int titleState = 0;
+    public final int playState = 1;
+    public final int pauseState = 2;
+    public final int gameOverState = 3;
+
+    // Entity
+    public Player player = new Player(this, keyH);
+    public Slime slime[] = new Slime[2];
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -40,49 +58,115 @@ public class GamePanel extends JPanel implements Runnable {
         this.setFocusable(true);
     }
 
+    public void setupGame() {
+        aSetter.setSlime();
+        env.setup();
+        gameState = titleState;
+    }
+
     public void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();
     }
 
-    @Override
+    public void restart() {
+        player.setDefaultValues();
+        aSetter.setSlime();
+    }
+
     public void run() {
-        double targetFrameTime = 1000000000.0 / fps;
+
+        double drawInterval = 1000000000 / fps;
         double delta = 0;
         long lastTime = System.nanoTime();
         long currentTime;
 
+        long timer = 0;
+        long drawCount = 0;
+
         while (gameThread != null) {
+
             currentTime = System.nanoTime();
-            delta += (currentTime - lastTime) / targetFrameTime;
+
+            delta += (currentTime - lastTime) / drawInterval;
+            timer += currentTime - lastTime;
+
             lastTime = currentTime;
 
             if (delta >= 1) {
                 update();
                 repaint();
                 delta--;
+                drawCount++;
+            }
 
-                long sleepTime = (long) ((targetFrameTime - (System.nanoTime() - currentTime)) / 1000000);
-                if (sleepTime > 0) {
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+            if (timer >= 1000000000) {
+                System.out.println("FPS: " + drawCount);
+                drawCount = 0;
+                timer = 0;
             }
         }
+
     }
 
     public void update() {
-        player.update();
+        if (gameState == playState) {
+            player.update();
+
+            // Update goblin clubs
+            for (int i = 0; i < slime.length; i++) {
+                if (slime[i] != null) {
+                    slime[i].update();
+                }
+            }
+        }
+        if (gameState == pauseState) {
+            // Handle pause state updates here
+        }
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        tm.draw(g2);
-        player.draw(g2);
+
+        if (gameState == titleState) {
+            ui.draw(g2);
+        } else {
+            tm.draw(g2);
+            drawEntities(g2);
+            env.draw(g2);
+            ui.draw(g2);
+
+            // Draw entities (player and goblin clubs)
+
+        }
         g2.dispose();
+    }
+
+    public void drawEntities(Graphics2D g2) {
+        // Draw goblin clubs
+        for (int i = 0; i < slime.length; i++) {
+            if (slime[i] != null) {
+                slime[i].draw(g2);
+            }
+        }
+
+        // Draw player
+        player.draw(g2);
+    }
+
+    public void playMusic(int i) {
+        sound.setFile(i);
+        sound.play();
+        sound.loop();
+    }
+
+    public void stopMusic() {
+        sound.stop();
+    }
+
+    public void playSE(int i) {
+        sound.setFile(i);
+        sound.play();
     }
 }
