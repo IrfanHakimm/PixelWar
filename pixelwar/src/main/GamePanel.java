@@ -69,9 +69,10 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void setupGame() {
-        aSetter.setSlime();
         env.setup();
+        aSetter.setSlime();
         gameState = titleState;
+        playMusic(0);
     }
 
     public void respawnMonster() {
@@ -172,6 +173,8 @@ public class GamePanel extends JPanel implements Runnable {
             for (int i = 0; i < entityList.size(); i++) {
                 entityList.get(i).draw(g2);
             }
+
+            env.draw(g2);
 
             // ResetDraw
             entityList.clear();
