@@ -11,15 +11,15 @@ public class AssetSetter {
     }
 
     public void setSlime() {
-        
-            gp.slime[0] = new Slime(gp);
-            gp.slime[0].worldX = gp.tileSize * 23;
-            gp.slime[0].worldY = gp.tileSize * 36;
 
-            gp.slime[1] = new Slime(gp);
-            gp.slime[1].worldX = gp.tileSize * 29;
-            gp.slime[1].worldY = gp.tileSize * 20;
+        int[] worldXCoordinates = { 23, 29, 37, 36, 35, 32, 40 };
+        int[] worldYCoordinates = { 36, 20, 27, 35, 19, 28, 26 };
+
+        for (int i = 0; i < 7; i++) {
+            gp.slime[i] = new Slime(gp);
+            gp.slime[i].worldX = gp.tileSize * worldXCoordinates[i];
+            gp.slime[i].worldY = gp.tileSize * worldYCoordinates[i];
+        }
 
     }
-
 }

@@ -110,11 +110,9 @@ public class CollisionChecker {
     }
 
     public int checkEntity(Entity entity, Entity[] target) {
-
         int index = 999;
 
         for (int i = 0; i < target.length; i++) {
-
             if (target[i] != null) {
                 // get entity's solid area position
                 gp.player.solidArea.x = gp.player.worldX + gp.player.solidArea.x;
@@ -138,19 +136,19 @@ public class CollisionChecker {
                         entity.solidArea.x += entity.speed;
                         break;
                 }
-            }
-            if (entity.solidArea.intersects(target[i].solidArea)) {
-                if (target[i] != entity) {
 
+                if (target[i].solidArea.intersects(target[i].solidArea)) {
+                    if (entity.solidArea.intersects(target[i].solidArea) && target[i] != entity) {
+                        entity.collisionOn = true;
+                        index = i;
+                    }
                 }
-                entity.collisionOn = true;
-                index = i;
-            }
-            entity.solidArea.x = entity.solidAreaDefaultX;
-            entity.solidArea.y = entity.solidAreaDefaultY;
-            target[i].solidArea.x = target[i].solidAreaDefaultX;
-            target[i].solidArea.y = target[i].solidAreaDefaultY;
 
+                entity.solidArea.x = entity.solidAreaDefaultX;
+                entity.solidArea.y = entity.solidAreaDefaultY;
+                target[i].solidArea.x = target[i].solidAreaDefaultX;
+                target[i].solidArea.y = target[i].solidAreaDefaultY;
+            }
         }
         return index;
     }

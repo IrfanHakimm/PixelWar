@@ -13,6 +13,7 @@ public class TileManager {
 	GamePanel gp;
 	public Tile[] tile;
 	public int mapTileNum[][];
+	public boolean drawPath = true;
 
 	public TileManager(GamePanel gp) {
 		this.gp = gp;
@@ -29,10 +30,12 @@ public class TileManager {
 			tile[0].image = ImageIO.read(getClass().getResourceAsStream("/tiles/grass.png"));
 			tile[1] = new Tile();
 			tile[1].image = ImageIO.read(getClass().getResourceAsStream("/tiles/gtepi.png"));
+			tile[1].collision = true;
 			tile[2] = new Tile();
 			tile[2].image = ImageIO.read(getClass().getResourceAsStream("/tiles/grass_shadow_kiri.png"));
 			tile[3] = new Tile();
 			tile[3].image = ImageIO.read(getClass().getResourceAsStream("/tiles/gtepi_shadow_kiri.png"));
+			tile[3].collision = true;
 			tile[4] = new Tile();
 			tile[4].image = ImageIO.read(getClass().getResourceAsStream("/tiles/rock.png"));
 			tile[5] = new Tile();
@@ -90,7 +93,8 @@ public class TileManager {
 			}
 			br.close();
 		} catch (Exception e) {
-			// TODO: handle exception
+
+			e.printStackTrace();
 		}
 	}
 
@@ -122,7 +126,7 @@ public class TileManager {
 				col = 0;
 				row++;
 			}
-		}
 
+		}
 	}
 }

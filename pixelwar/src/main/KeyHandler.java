@@ -5,7 +5,7 @@ import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
     GamePanel gp;
-    public boolean upPressed, downPressed, leftPressed, rightPressed;
+    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
 
     public KeyHandler(GamePanel gp) {
         this.gp = gp;
@@ -23,6 +23,31 @@ public class KeyHandler implements KeyListener {
         int code = e.getKeyCode();
         // title state
         if (gp.gameState == gp.titleState) {
+            if (code == KeyEvent.VK_W) {
+                gp.ui.commandNum--;
+                gp.playSE(1);
+                if (gp.ui.commandNum < 0) {
+
+                    gp.ui.commandNum = 1;
+                }
+            }
+            if (code == KeyEvent.VK_S) {
+                gp.ui.commandNum++;
+                gp.playSE(1);
+                if (gp.ui.commandNum > 1) {
+                    gp.ui.commandNum = 0;
+                }
+            }
+            if (code == KeyEvent.VK_ENTER) {
+                if (gp.ui.commandNum == 0) {
+                    gp.gameState = gp.playState;
+                }
+                if (gp.ui.commandNum == 1) {
+                    System.exit(0);
+                }
+            }
+        }
+        if (gp.gameState == gp.winState) {
             if (code == KeyEvent.VK_W) {
                 gp.ui.commandNum--;
                 gp.playSE(1);
@@ -90,6 +115,9 @@ public class KeyHandler implements KeyListener {
             if (code == KeyEvent.VK_D) {
                 rightPressed = true;
             }
+            if (code == KeyEvent.VK_ENTER) {
+                enterPressed = true;
+            }
             if (code == KeyEvent.VK_P) {
                 gp.gameState = gp.pauseState;
             }
@@ -118,6 +146,9 @@ public class KeyHandler implements KeyListener {
         }
         if (code == KeyEvent.VK_D) {
             rightPressed = false;
+        }
+        if (code == KeyEvent.VK_ENTER) {
+            enterPressed = false;
         }
     }
 

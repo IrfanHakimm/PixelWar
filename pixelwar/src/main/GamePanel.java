@@ -2,6 +2,8 @@ package main;
 
 import javax.swing.JPanel;
 
+import ai.PathFinder;
+import entity.Entity;
 import entity.Player;
 import environment.EnvironmentManager;
 import monster.Slime;
@@ -10,6 +12,11 @@ import tile.TileManager;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Objects;
 import java.awt.Color;
 
 public class GamePanel extends JPanel implements Runnable {
@@ -17,25 +24,26 @@ public class GamePanel extends JPanel implements Runnable {
     final int scale = 3;
 
     public final int tileSize = originalTileSize * scale; // 48x48
-    public int maxScreenCol = 20;
+    public int maxScreenCol = 16;
     public int maxScreenRow = 12;
     public int screenWidth = tileSize * maxScreenCol; // 768px
     public int screenHeight = tileSize * maxScreenRow; // 576px
 
     public final int maxWorldCol = 50;
-    public final int maxWorldRow = 51;
+    public final int maxWorldRow = 50;
     public final int worldwidth = tileSize * maxWorldCol;
     public final int worldheight = tileSize * maxWorldRow;
 
     int fps = 60;
 
     // system
-    TileManager tm = new TileManager(this);
-    KeyHandler keyH = new KeyHandler(this);
+    public TileManager tm = new TileManager(this);
+    public KeyHandler keyH = new KeyHandler(this);
     Sound sound = new Sound();
     public UI ui = new UI(this);
     public CollisionChecker cChecker = new CollisionChecker(this);
     public AssetSetter aSetter = new AssetSetter(this);
+    public PathFinder pFinder = new PathFinder(this);
     EnvironmentManager env = new EnvironmentManager(this);
     Thread gameThread;
 
@@ -45,10 +53,12 @@ public class GamePanel extends JPanel implements Runnable {
     public final int playState = 1;
     public final int pauseState = 2;
     public final int gameOverState = 3;
+    public final int winState = 4;
 
     // Entity
     public Player player = new Player(this, keyH);
-    public Slime slime[] = new Slime[2];
+    public Entity slime[] = new Slime[20];
+    ArrayList<Entity> entityList = new ArrayList<Entity>();
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -60,8 +70,14 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupGame() {
         aSetter.setSlime();
-        env.setup();
+        // env.setup();
         gameState = titleState;
+    }
+
+    public void respawnMonster() {
+        if (Arrays.stream(slime).allMatch(Objects::isNull)) {
+            aSetter.setSlime();
+        }
     }
 
     public void startGameThread() {
@@ -112,6 +128,7 @@ public class GamePanel extends JPanel implements Runnable {
     public void update() {
         if (gameState == playState) {
             player.update();
+            respawnMonster();
 
             // Update goblin clubs
             for (int i = 0; i < slime.length; i++) {
@@ -133,26 +150,37 @@ public class GamePanel extends JPanel implements Runnable {
             ui.draw(g2);
         } else {
             tm.draw(g2);
-            drawEntities(g2);
-            env.draw(g2);
-            ui.draw(g2);
+            // player
+            entityList.add(player);
 
-            // Draw entities (player and goblin clubs)
+            // Monster
+            for (int i = 0; i < slime.length; i++) {
+                if (slime[i] != null) {
+                    entityList.add(slime[i]);
+                }
+            }
+
+            Collections.sort(entityList, new Comparator<Entity>() {
+                @Override
+                public int compare(Entity e1, Entity e2) {
+                    int result = Integer.compare(e1.worldY, e2.worldY);
+                    return result;
+                }
+            });
+
+            // Draw Entity
+            for (int i = 0; i < entityList.size(); i++) {
+                entityList.get(i).draw(g2);
+            }
+
+            // ResetDraw
+            entityList.clear();
+
+            // env.draw(g2);
+            ui.draw(g2);
 
         }
         g2.dispose();
-    }
-
-    public void drawEntities(Graphics2D g2) {
-        // Draw goblin clubs
-        for (int i = 0; i < slime.length; i++) {
-            if (slime[i] != null) {
-                slime[i].draw(g2);
-            }
-        }
-
-        // Draw player
-        player.draw(g2);
     }
 
     public void playMusic(int i) {
