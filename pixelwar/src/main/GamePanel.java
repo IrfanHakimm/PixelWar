@@ -70,7 +70,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupGame() {
         aSetter.setSlime();
-        // env.setup();
+        env.setup();
         gameState = titleState;
     }
 
